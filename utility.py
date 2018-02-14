@@ -1,8 +1,26 @@
 import math
-# from sympy import Point, Circle, intersection
-import matplotlib.pyplot as plt
+from shapely.geometry import Point
+from shapely.ops import cascaded_union
+from itertools import combinations
 
+def find_intersetion(circles):
+	cs = [ Point(c[0][0],c[0][1]).buffer(c[1]) for c in circles]
+	intersections = [a.intersection(b) for a,b in combinations(cs, 2)]
+	
+	intersection = []
+	for each in intersections:
+		if each.area != 0:
+			intersection.append(each)
+			
+	intersection = min(intersection, key=lambda x:x.area)
+	ans = cs[0]
+	for c in cs:
+		ans = ans.intersection(c)
 
+	if(ans.area == 0):
+		return intersection
+
+	return ans
 
 def signal_strength_to_distance(signal, freq):
 	"""
