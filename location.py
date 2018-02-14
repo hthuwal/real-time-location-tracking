@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
 import utility
+import descartes
 
 macs = ["74:23:44:33:2f:b7", "00:0c:e7:4f:38:a5", "88:36:5f:f8:3b:4a", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
 macs = ["c0:ee:fb:72:0c:27"]
@@ -19,20 +20,28 @@ fig = plt.figure(1)
 
 
 def plot_circles(circles, mac, ts):
-    fig.clf()
     ax = fig.add_subplot(1, 1, 1)
     ax.set_title(mac + '\n' + str(ts))
-    ax.set_xlim(-100, 100)
-    ax.set_ylim(-100, 100)
+    ax.set_xlim(-50, 35)
+    ax.set_ylim(-10, 50)
     for circle in circles:
         print(circle)
         c = plt.Circle(circle[0], circle[1], color='b', fill=False)
         ax.add_artist(c)
-    ax.legend(['Harish'])
     plt.pause(2)
 
 
-df = pd.read_json("spencers_data/10.log", lines=True)  # reading data
+def plot_polygon(p, mac, ts):
+    
+    ax = fig.add_subplot(1, 1, 1)
+    ax.set_title(mac + '\n' + str(ts) + '\n' + str(p.centroid))
+    ax.set_xlim(-50, 35)
+    ax.set_ylim(-10, 50)
+    ax.add_patch(descartes.PolygonPatch(p, fc='b', ec='k', alpha=0.2))
+    plt.pause(2)
+
+
+df = pd.read_json("spencers_data/13.log", lines=True)  # reading data
 df['ts'] = pd.to_datetime(df['ts'], infer_datetime_format=True)
 
 
@@ -69,6 +78,8 @@ for index, row in df_loc_track.iterrows():
         radial_distance = utility.rssi_to_dis(power)
         circles.append((aps[cid], radial_distance))
 
-    plot_circles(circles, row['mac'], row['ts'])
+    intersection = utility.find_intersetion(circles)
+    print(ts, intersection.centroid)
+    input()
     # print(utility.signal_strength_to_distance(row['si']))
 plt.show()
