@@ -1,26 +1,61 @@
 import math
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 from shapely.ops import cascaded_union
 from itertools import combinations
 
-def find_intersetion(circles):
-	cs = [ Point(c[0][0],c[0][1]).buffer(c[1]) for c in circles]
-	intersections = [a.intersection(b) for a,b in combinations(cs, 2)]
-	
-	intersection = []
-	for each in intersections:
-		if each.area != 0:
-			intersection.append(each)
-			
-	intersection = min(intersection, key=lambda x:x.area)
-	ans = cs[0]
-	for c in cs:
-		ans = ans.intersection(c)
 
-	if(ans.area == 0):
-		return intersection
+def fi(circles):
+    cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
+    intersections = [a.intersection(b) for a, b in combinations(cs, 2)]
 
-	return ans
+    intersection = []
+    for each in intersections:
+        if each.area != 0:
+            intersection.append(each)
+
+    ans = cs[0]
+    for c in cs:
+        ans = ans.intersection(c)
+
+    if(ans.area != 0):
+        return ans.centroid
+
+    if(len(intersection) != 0):
+        return min(intersection, key=lambda x: x.area).centroid
+
+    return None
+
+
+def fiwc(circles):
+    cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
+    intersections = [a.intersection(b) for a, b in combinations(cs, 2)]
+    weights = [1 / (a[1] * b[1]) for a, b in combinations(circles, 2)]
+
+    centroids = []
+    weight = []
+    for i, w in zip(intersections, weight):
+        if i.area != 0:
+            centroids.append(i.centroid)
+            weight.append(w)
+
+    ans = cs[0]
+    for c in cs:
+        ans = ans.intersection(c)
+
+    if(ans.area != 0):
+        return ans.centroid
+
+    if(len(centroids) != 0):
+        x, y = 0, 0
+        t = 0
+        for c, w in zip(centroids, weight):
+            x += c.x * w
+            y += c.y * w
+            t += w
+
+        return Point(x / t, y / t)
+    return None
+
 
 def signal_strength_to_distance(signal, freq):
 	"""
