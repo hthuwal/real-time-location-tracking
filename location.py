@@ -17,3 +17,15 @@ df['ts'] = df['ts'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M'))
 df = df.groupby(['nasid', 'controllerid', 'position', 'ts', 'mac']).mean()
 df.reset_index(inplace=True)
 
+df = df.groupby(['nasid', 'position', 'ts', 'mac'])
+lst = list(df)
+print(lst[1][0])
+df_loc_track = pd.DataFrame(columns=['nasid', 'position', 'ts', 'mac', 'controllerid', 'pwr', 'count'], dtype=object)
+# print(df_loc_track.dtypes)
+for i in range(len(lst)):
+    x = lst[i]
+
+    cid_list = x[1]['controllerid'].tolist()
+    pwr_list = x[1]['pwr'].tolist()
+
+    df_loc_track.loc[i, :] = [x[0][0], x[0][1], x[0][2], x[0][3], str(cid_list), str(pwr_list), len(cid_list)]
