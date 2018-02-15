@@ -20,26 +20,29 @@ aps = {
 
 
 fig = plt.figure(1)
+ax = fig.add_subplot(1, 1, 1)
 
 
 def plot_circles(circles, mac, ts):
-    ax = fig.add_subplot(1, 1, 1)
+    ax.cla()
     ax.set_title(mac + '\n' + str(ts))
-    ax.set_xlim(-50, 35)
-    ax.set_ylim(-10, 50)
+    ax.set_xlim(-100, 100)
+    ax.set_ylim(-100, 100)
     for circle in circles:
         print(circle)
         c = plt.Circle(circle[0], circle[1], color='b', fill=False)
         ax.add_artist(c)
-    plt.pause(2)
 
+def plot(ay, x, y, color='b'):
+    ay.plot(x, y, marker='o', markersize=3, color=color)
+    plt.pause(1)
 
 def plot_polygon(p, mac, ts):
 
     ax = fig.add_subplot(1, 1, 1)
     ax.set_title(mac + '\n' + str(ts) + '\n' + str(p.centroid))
-    ax.set_xlim(-50, 35)
-    ax.set_ylim(-10, 50)
+    ax.set_xlim(-100, 100)
+    ax.set_ylim(-100, 100)
     ax.add_patch(descartes.PolygonPatch(p, fc='b', ec='k', alpha=0.2))
     plt.pause(2)
 
@@ -47,62 +50,66 @@ def plot_polygon(p, mac, ts):
 f = os.listdir('spencers_data')
 f.sort()
 
-for mac in macs:
-    print(mac)
-    for file in f:
-        base, ext = os.path.splitext(file)
-        if(ext == ".log"):
-            print(file)
-            df = pd.read_json("spencers_data/%s" % (file), lines=True)  # reading data
-            df['ts'] = pd.to_datetime(df['ts'], infer_datetime_format=True)
 
-            df['ts'] = df['ts'].apply(lambda x: x + datetime.timedelta(hours=5, minutes=30))  # converrting utc time ist
+mac = macs[1]
+for file in f:
+    base, ext = os.path.splitext(file)
+    if(ext == ".log"):
+        print(file)
+        df = pd.read_json("spencers_data/%s" % (file), lines=True)  # reading data
+        df['ts'] = pd.to_datetime(df['ts'], infer_datetime_format=True)
 
-            df = df.loc[df['mac'].isin([mac])]  # filtering out data corresponding to our macs
+        df['ts'] = df['ts'].apply(lambda x: x + datetime.timedelta(hours=5, minutes=30))  # converrting utc time ist
 
-            # making code granular by per minute
-            df['ts'] = df['ts'].apply(lambda x: x.strftime('%H:%M'))
-            df = df.groupby(['nasid', 'controllerid', 'position', 'ts', 'mac']).mean()
-            df.reset_index(inplace=True)
+        df = df.loc[df['mac'].isin([mac])]  # filtering out data corresponding to our macs
 
-            df = df.groupby(['nasid', 'position', 'ts', 'mac'])
-            lst = list(df)
-            df_loc_track = pd.DataFrame(columns=['nasid', 'position', 'ts', 'mac', 'controllerid', 'pwr', 'count'], dtype=object)
+        # making code granular by per minute
+        df['ts'] = df['ts'].apply(lambda x: x.strftime('%H:%M'))
+        df = df.groupby(['nasid', 'controllerid', 'position', 'ts', 'mac']).mean()
+        df.reset_index(inplace=True)
 
-            for i in range(len(lst)):
-                x = lst[i]
+        df = df.groupby(['nasid', 'position', 'ts', 'mac'])
+        lst = list(df)
+        df_loc_track = pd.DataFrame(columns=['nasid', 'position', 'ts', 'mac', 'controllerid', 'pwr', 'count'], dtype=object)
 
-                cid_list = list(map(str, x[1]['controllerid'].tolist()))
-                pwr_list = list(map(str, x[1]['pwr'].tolist()))
+        for i in range(len(lst)):
+            x = lst[i]
 
-                df_loc_track.loc[i, :] = [x[0][0], x[0][1], x[0][2], x[0][3], " ".join(cid_list), " ".join(pwr_list), len(cid_list)]
+            cid_list = list(map(str, x[1]['controllerid'].tolist()))
+            pwr_list = list(map(str, x[1]['pwr'].tolist()))
 
-            df_loc_track.reset_index(inplace=True)
-            hc = open("Weighted_mean/%s.csv" % (mac), 'a')
-            # hc = open("smallest_area/%s.csv" % (mac), 'a')
-            for index, row in df_loc_track.iterrows():
-                print(row['ts'])
-                if row['count'] >= 2:
-                    controllers = list(map(int, row['controllerid'].split()))
-                    powers = list(map(float, row['pwr'].split()))
-                    mac = row['mac']
-                    ts = row['ts']
+            df_loc_track.loc[i, :] = [x[0][0], x[0][1], x[0][2], x[0][3], " ".join(cid_list), " ".join(pwr_list), len(cid_list)]
 
-                    circles = []
-                    for cid, power in zip(controllers, powers):
-                        radial_distance = utility.rssi_to_dis(power)
-                        circles.append((aps[cid], radial_distance))
+        df_loc_track.reset_index(inplace=True)
+        # hc = open("Weighted_mean/%s.csv" % (mac), 'a')
+        # hc = open("smallest_area/%s.csv" % (mac), 'a')
+        x = [-22, 0, 0, -22]
+        y = [1, 1, 24, 26]
+        for index, row in df_loc_track.iterrows():
+            print(row['ts'])
 
-                    intersection = utility.fi(circles)
-                    # intersection = utility.fiwc(circles)
-                    if intersection == None:
-                        pass
-                        # hc.write(str(ts)+","+"None\n")
-                    else:
-                        hc.write(str(ts) + "," + str(intersection.centroid.x) + "," + str(intersection.centroid.y) + "\n")
-            hc.close()
-            # input()
-            # fig.clf()
-            # plot_circles(circles, mac, ts)
+            if row['count'] >= 2:
+                controllers = list(map(int, row['controllerid'].split()))
+                powers = list(map(float, row['pwr'].split()))
+                mac = row['mac']
+                ts = row['ts']
 
-        # plt.show()
+                circles = []
+                for cid, power in zip(controllers, powers):
+                    radial_distance = utility.rssi_to_dis(power)
+                    circles.append((aps[int(cid)], radial_distance))
+
+                intersection = utility.fiwc(circles)
+                plot_circles(circles, mac, ts)
+                plot(ax, x + [intersection.x],y + [intersection.y], 'red')
+                # if intersection == None:
+                #     pass
+
+                # else:
+                # hc.write(str(ts) + "," + str(intersection.centroid.x) + "," + str(intersection.centroid.y) + "\n")
+        # hc.close()
+        # input()
+        # fig.clf()
+        # plot_circles(circles, mac, ts)
+
+    # plt.show()
