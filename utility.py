@@ -54,7 +54,16 @@ def fiwc(circles):
             t += w
 
         return Point(x / t, y / t)
-    return None
+
+    x, y = 0, 0
+    t = 0
+    for c in circles:
+        w = 1.0 / (c[1])
+        x += c[0][0] * w
+        y += c[0][1] * w
+        t += w
+
+    return Point(x / t, y / t)
 
 
 # Using either of the two methods seems to give same results
@@ -66,7 +75,7 @@ def signal_strength_to_distance(signal, freq):
 
 
 def rssi_to_dis(signal):
-    n = 2
+    n = 3
     return (10 ** ((-40 - signal) / (10 * n))) * (39.3701 / 34)
 
 
@@ -83,4 +92,3 @@ def root_mean_square_error(validation, test):
     error = [e * e for e in error]
     l = len(error)
     return math.sqrt(sum(error) / l)
-
