@@ -80,8 +80,6 @@ def rssi_to_dis(signal):
 
 
 def root_mean_square_error(validation, test):
-    print(validation)
-    print(test)
     error = []
     for time in validation:
         if time in test:
