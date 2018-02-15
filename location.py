@@ -5,9 +5,11 @@ import datetime
 import utility
 import descartes
 import os
+import numpy as np
 
-macs = ["74:23:44:33:2f:b7", "00:0c:e7:4f:38:a5", "88:36:5f:f8:3b:4a", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
 
+macs = ["00:0c:e7:4f:38:a5", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
+names = ["Micromax", "Samsung S5", "oneplus x", "Yureka", "Moto"]
 # factor to convert to inches (doesn't have any effect on the nature of plots as everything is just scaled up)
 factor = 1
 
@@ -21,37 +23,53 @@ aps = {
 
 fig = plt.figure(1)
 ax = fig.add_subplot(1, 1, 1)
+ax.set_title("Heurisitic 3")
+ax.autoscale()
+
+aps_plot, = ax.plot([-22, 0, 0, -22], [1, 1, 24, 26], marker='o', markersize=10, ls='')
+validation, = ax.plot([], [], marker='o', markersize=3, color='g')
+path, = ax.plot([], [], marker='+', markersize=3, color='red')
 
 
 def plot_circles(circles, mac, ts):
     ax.cla()
     ax.set_title(mac + '\n' + str(ts))
-    ax.set_xlim(-100, 100)
-    ax.set_ylim(-100, 100)
+
     for circle in circles:
         print(circle)
         c = plt.Circle(circle[0], circle[1], color='b', fill=False)
         ax.add_artist(c)
 
-def plot(ay, x, y, color='b'):
-    ay.plot(x, y, marker='o', markersize=3, color=color)
-    plt.pause(1)
 
-def plot_polygon(p, mac, ts):
-
-    ax = fig.add_subplot(1, 1, 1)
-    ax.set_title(mac + '\n' + str(ts) + '\n' + str(p.centroid))
-    ax.set_xlim(-100, 100)
-    ax.set_ylim(-100, 100)
-    ax.add_patch(descartes.PolygonPatch(p, fc='b', ec='k', alpha=0.2))
-    plt.pause(2)
+def update(obj, x, y):
+    x_old = obj.get_xdata()
+    y_old = obj.get_ydata()
+    x_old = np.append(x_old, x)
+    y_old = np.append(y_old, y)
+    obj.set_data(x_old, y_old)
 
 
 f = os.listdir('spencers_data')
 f.sort()
 
+# reading and plotting validation data
+validation_data1 = pd.read_csv("spencers_data/path1.csv")
+validation_data1['Start_time'] = pd.to_datetime(validation_data1['Start_time'], infer_datetime_format=True)
+validation_data1['Start_time'] = validation_data1['Start_time'].apply(lambda x: x + datetime.timedelta(hours=12))  # todo write proper code
+validation_data1['Start_time'] = validation_data1['Start_time'].apply(lambda x: x.strftime('%H:%M'))
+x_validation1 = validation_data1['X'].tolist()
+y_validation1 = validation_data1['Y'].tolist()
+ts1 = validation_data1['Start_time'].tolist()
 
-mac = macs[1]
+validation_dict1 = {}
+for a, b, c in zip(ts1, x_validation1, y_validation1):
+    validation_dict1[a] = (b, c)
+
+
+test_dict1 = {}
+
+mac = macs[0]
+name = names[0]
 for file in f:
     base, ext = os.path.splitext(file)
     if(ext == ".log"):
@@ -81,10 +99,7 @@ for file in f:
             df_loc_track.loc[i, :] = [x[0][0], x[0][1], x[0][2], x[0][3], " ".join(cid_list), " ".join(pwr_list), len(cid_list)]
 
         df_loc_track.reset_index(inplace=True)
-        # hc = open("Weighted_mean/%s.csv" % (mac), 'a')
-        # hc = open("smallest_area/%s.csv" % (mac), 'a')
-        x = [-22, 0, 0, -22]
-        y = [1, 1, 24, 26]
+
         for index, row in df_loc_track.iterrows():
             print(row['ts'])
 
@@ -93,23 +108,45 @@ for file in f:
                 powers = list(map(float, row['pwr'].split()))
                 mac = row['mac']
                 ts = row['ts']
-
+                print(ts)
                 circles = []
+
                 for cid, power in zip(controllers, powers):
                     radial_distance = utility.rssi_to_dis(power)
                     circles.append((aps[int(cid)], radial_distance))
 
-                intersection = utility.fiwc(circles)
-                plot_circles(circles, mac, ts)
-                plot(ax, x + [intersection.x],y + [intersection.y], 'red')
-                # if intersection == None:
-                #     pass
+                intersection = utility.heuristic_3(circles)
 
-                # else:
-                # hc.write(str(ts) + "," + str(intersection.centroid.x) + "," + str(intersection.centroid.y) + "\n")
-        # hc.close()
-        # input()
-        # fig.clf()
-        # plot_circles(circles, mac, ts)
+                # plot_circles(circles, mac, ts)
 
-    # plt.show()
+                if intersection == None:
+                    pass
+                elif (ts in ts1):
+                    test_dict1[ts] = (intersection.x, intersection.y)
+                    print(test_dict1[ts])
+                else:
+                    print("Not in path %s" % (ts))
+
+count = 0
+num_loc = 0
+target = "plots/heuristic3/" + name
+ax.legend([path, validation], ["# points: %d" % (num_loc)])
+
+for ts in validation_dict1:
+    count += 1
+    update(validation, [validation_dict1[ts][0]], [validation_dict1[ts][1]])
+    if ts in test_dict1:
+        num_loc += 1
+        update(path, [test_dict1[ts][0]], [test_dict1[ts][1]])
+        ax.legend([path, validation], ["# points: %d\ntime: %s" % (num_loc, ts)])
+
+    if not os.path.exists(target):
+        os.makedirs(target)
+
+    plt.savefig(target + "/%03d.png" % count)
+    ax.set_title("%s\nHeurisitic 3" % (name))
+    plt.pause(0.2)
+
+ax.set_title("%s\nHeurisitic 3\nRMSQ: %f" % (name, utility.root_mean_square_error(validation_dict1, test_dict1)))
+plt.savefig(target + "/%03d.png" % (count + 1))
+plt.show()

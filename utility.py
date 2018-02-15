@@ -25,15 +25,25 @@ def fi(circles):
 
     return None
 
+def heuristic_1(circles):
+    cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
+    ans = cs[0]
+    for c in cs:
+        ans = ans.intersection(c)
 
-def fiwc(circles):
+    if(ans.area != 0):
+        return ans.centroid
+
+    return None
+
+def heuristic_2(circles):
     cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
     intersections = [a.intersection(b) for a, b in combinations(cs, 2)]
     weights = [1 / (a[1] * b[1]) for a, b in combinations(circles, 2)]
 
     centroids = []
     weight = []
-    for i, w in zip(intersections, weight):
+    for i, w in zip(intersections, weights):
         if i.area != 0:
             centroids.append(i.centroid)
             weight.append(w)
@@ -54,6 +64,27 @@ def fiwc(circles):
             t += w
 
         return Point(x / t, y / t)
+
+    return None
+
+def heuristic_3(circles):
+    cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
+    intersections = [a.intersection(b) for a, b in combinations(cs, 2)]
+    weights = [1 / (a[1] * b[1]) for a, b in combinations(circles, 2)]
+
+    centroids = []
+    weight = []
+    for i, w in zip(intersections, weights):
+        if i.area != 0:
+            centroids.append(i.centroid)
+            weight.append(w)
+
+    ans = cs[0]
+    for c in cs:
+        ans = ans.intersection(c)
+
+    if(ans.area != 0):
+        return ans.centroid
 
     x, y = 0, 0
     t = 0
@@ -80,8 +111,6 @@ def rssi_to_dis(signal):
 
 
 def root_mean_square_error(validation, test):
-    print(validation)
-    print(test)
     error = []
     for time in validation:
         if time in test:
