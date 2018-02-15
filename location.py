@@ -68,8 +68,8 @@ for a, b, c in zip(ts1, x_validation1, y_validation1):
 
 test_dict1 = {}
 
-mac = macs[4]
-name = names[4] 
+mac = macs[0]
+name = names[0]
 for file in f:
     base, ext = os.path.splitext(file)
     if(ext == ".log"):
@@ -115,31 +115,38 @@ for file in f:
                     radial_distance = utility.rssi_to_dis(power)
                     circles.append((aps[int(cid)], radial_distance))
 
-                intersection = utility.fiwc(circles)
+                intersection = utility.heuristic_3(circles)
+
                 # plot_circles(circles, mac, ts)
 
                 if intersection == None:
                     pass
                 elif (ts in ts1):
-                    test_dict1[ts]=(intersection.x, intersection.y)
+                    test_dict1[ts] = (intersection.x, intersection.y)
+                    print(test_dict1[ts])
+                else:
+                    print("Not in path %s" % (ts))
 
 count = 0
 num_loc = 0
-for ts in validation_dict1: 
+target = "plots/heuristic3/" + name
+ax.legend([path, validation], ["# points: %d" % (num_loc)])
+
+for ts in validation_dict1:
     count += 1
     update(validation, [validation_dict1[ts][0]], [validation_dict1[ts][1]])
     if ts in test_dict1:
         num_loc += 1
         update(path, [test_dict1[ts][0]], [test_dict1[ts][1]])
         ax.legend([path, validation], ["# points: %d\ntime: %s" % (num_loc, ts)])
-    
-    if not os.path.exists(name):
-        os.makedirs(name)
-    
-    plt.savefig(name+"/%03d.png" % count)
-    ax.set_title("%s\nHeurisitic 3" %(name))
+
+    if not os.path.exists(target):
+        os.makedirs(target)
+
+    plt.savefig(target + "/%03d.png" % count)
+    ax.set_title("%s\nHeurisitic 3" % (name))
     plt.pause(0.2)
-                   
-ax.set_title("%s\nHeurisitic 3\nRMSQ: %f" %(name, utility.root_mean_square_error(validation_dict1, test_dict1)))
-plt.savefig(name+"/%03d.png" % (count+1))
+
+ax.set_title("%s\nHeurisitic 3\nRMSQ: %f" % (name, utility.root_mean_square_error(validation_dict1, test_dict1)))
+plt.savefig(target + "/%03d.png" % (count + 1))
 plt.show()
