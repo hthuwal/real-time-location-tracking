@@ -68,3 +68,19 @@ def signal_strength_to_distance(signal, freq):
 def rssi_to_dis(signal):
     n = 2
     return (10 ** ((-40 - signal) / (10 * n))) * (39.3701 / 34)
+
+
+def root_mean_square_error(validation, test):
+    print(validation)
+    print(test)
+    error = []
+    for time in validation:
+        if time in test:
+            p1 = Point(validation[time][0], validation[time][1])
+            p2 = Point(test[time][0], test[time][1])
+            error.append(p1.distance(p2))
+
+    error = [e * e for e in error]
+    l = len(error)
+    return math.sqrt(sum(error) / l)
+
