@@ -62,16 +62,16 @@ df_path.sort_values('Start_time', inplace=True)
 df_path.reset_index(drop=True, inplace=True)
 df_path['Start_time'] = df_path['Start_time'] + pd.Timedelta('12 hours')
 
-# print df_path
+# print (df_path)
 
 f = ['micromax', 'moto', 'oneplus', 'samsung', 'yureka']
-
 for file in f:
+    count = 0
     df_loc_track = pd.read_csv('spencers_data/device_modified_logs_min/'+str(file)+'.csv')
     df_loc_track['ts'] = pd.to_datetime(df_loc_track['ts'])
     df_loc_track['ts'] = df_loc_track['ts'] + pd.Timedelta('5 hours 30 minutes')
 
-    print len(df_loc_track)
+    print(len(df_loc_track))
     idx_lst = []
     for index, row in df_loc_track.iterrows():
         l = list(df_path['Start_time'])
@@ -81,7 +81,7 @@ for file in f:
     df_loc_track.drop(idx_lst, inplace=True)
     df_loc_track.reset_index(drop=True, inplace=True)
 
-    print len(df_loc_track)
+    print(len(df_loc_track))
     # hc = open("Weighted_mean/%s.csv" % (mac), 'a')
     # hc = open("smallest_area/%s.csv" % (mac), 'a')
     x = [-22, 0, 0, -22]
@@ -101,13 +101,18 @@ for file in f:
                 radial_distance = utility.rssi_to_dis(power)
                 circles.append((aps[int(cid)], radial_distance))
 
-            intersection = utility.fiwc(circles)
+            intersection = utility.heuristic_3(circles)
             plot_circles(circles, file, ts)
             ax.plot(x, y, 'bo', markersize=5)
             ax.plot(df_path.loc[index, 'X'], df_path.loc[index, 'Y'], 'go', markersize=5)
             plot(ax, [intersection.x], [intersection.y], 'red')
             # plt.pause(1)
-            plt.savefig('spencers_data/images/circles_'+str(file)+'_X'+str(int(df_path.loc[index, 'X']))+'_Y'+str(int(df_path.loc[index, 'Y']))+'.png')
+            count += 1
+            dirs = 'plots/circles/%s' %(file) 
+            if not os.path.exists(dirs):
+                os.makedirs(dirs)
+            plt.savefig(dirs+"/%03d.png" %(count))
+            # plt.savefig('spencers_data/images/circles_'+str(file)+'_X'+str(int(df_path.loc[index, 'X']))+'_Y'+str(int(df_path.loc[index, 'Y']))+'.png')
             # if intersection == None:
             #     pass
 
