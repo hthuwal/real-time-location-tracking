@@ -20,7 +20,7 @@ df_path1.sort_values('Start_time', inplace=True)
 df_path1.reset_index(drop=True, inplace=True)
 df_path1['Start_time'] = df_path1['Start_time'] + pd.Timedelta('12 hours')
 df_path1['Start_time'] = df_path1['Start_time'].apply(lambda x: x.strftime('%H:%M'))
-ts1 =  df_path1['Start_time'].tolist()
+ts1 = df_path1['Start_time'].tolist()
 
 # Reading path2 data and setting granularity to 1 min
 df_path2 = pd.read_csv('../spencers_data/path2.csv')
@@ -51,7 +51,7 @@ names = ["Samsung S5", "oneplus x", "Yureka"]
 f = os.listdir('../spencers_data')
 f.sort()
 
-final_df = pd.DataFrame(columns=['X','Y', 'ts', 'pwr1', 'pwr2', 'pwr3', 'pwr4'], dtype=object)
+final_df = pd.DataFrame(columns=['X', 'Y', 'ts', 'pwr1', 'pwr2', 'pwr3', 'pwr4'], dtype=object)
 for file in f:
     base, ext = os.path.splitext(file)
     if(ext == ".log"):
@@ -79,9 +79,9 @@ for file in f:
             cid_list = list(map(str, x[1]['controllerid'].tolist()))
             pwr_list = list(map(str, x[1]['pwr'].tolist()))
 
-            pwrs = [ '0' for i in range(4)]
+            pwrs = ['0' for i in range(4)]
             for cid, pwr in zip(cid_list, pwr_list):
-                pwrs[int(cid)-1] = pwr
+                pwrs[int(cid) - 1] = pwr
 
             time_stamp = x[0][2]
             if time_stamp in ts1:
