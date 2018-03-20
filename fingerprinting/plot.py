@@ -63,7 +63,7 @@ for ts in df_path1:
     ax.set_title("%s\nFingerprinting" % (name))
     plt.pause(0.02)
 
+ax.set_title("%s\nFingerprinting \nRMSQ: %f" % (name, utils.root_mean_square_error(df_path1, df)))
+plt.savefig("plots/%s/%03d.png" % (name, count + 1))
 plt.show()
-# ax.set_title("%s\nHeurisitic 3\nRMSQ: %f" % (name, utility.root_mean_square_error(dict_path2, test_dict)))
-# plt.savefig(target + "/%03d.png" % (count + 1))
-# plt.show()
+#
