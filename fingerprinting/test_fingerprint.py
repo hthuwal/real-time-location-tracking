@@ -1,6 +1,7 @@
 import pandas as pd
 import os
-import numpy as np 
+import numpy as np
+import utils
 import datetime
 
 df_device = pd.read_csv('moto.csv')
@@ -31,17 +32,17 @@ df_device_new['ts'] = df_device_new['ts'].apply(lambda x: x.strftime('%H:%M'))
 # print df_fingerprint
 
 for i in range(len(df_device_new)):
-	obs_pwr = df_device_new.loc[i, 'pwr']
-	obs_pwr = np.asarray(obs_pwr)
-	dot_prods = np.zeros(len(df_fingerprint))
-	for j in range(len(df_fingerprint)):
-		fng_pwr = [df_fingerprint.loc[j, 'pwr'+str(k)] for k in range(1, 5)]
-		fng_pwr = np.asarray(fng_pwr)
-		dot_prods[j] = np.sum(np.multiply(obs_pwr, fng_pwr))
+    obs_pwr = df_device_new.loc[i, 'pwr']
+    obs_pwr = np.asarray(obs_pwr)
+    euclidean_distance = np.zeros(len(df_fingerprint))
+    for j in range(len(df_fingerprint)):
+        fng_pwr = [df_fingerprint.loc[j, 'pwr' + str(k)] for k in range(1, 5)]
+        fng_pwr = np.asarray(fng_pwr)
+        euclidean_distance[j] = utils.euclidean_distance(obs_pwr, fng_pwr)
 
-	idx = np.argmax(dot_prods)
-	x = df_fingerprint.loc[idx, 'X']
-	y = df_fingerprint.loc[idx, 'Y']
+    idx = np.argmin(euclidean_distance)
+    x = df_fingerprint.loc[idx, 'X']
+    y = df_fingerprint.loc[idx, 'Y']
 
 	df_device_new.loc[i, 'pred_loc'] = [x, y]
 
