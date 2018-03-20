@@ -22,7 +22,7 @@ ax = fig.add_subplot(1, 1, 1)
 ax.autoscale()
 
 aps_plot, = ax.plot([-22, 0, 0, -22], [1, 1, 24, 26], marker='o', markersize=10, ls='')
-validation, = ax.plot([], [], marker='o', markersize=3, color='g')
+validation, = ax.plot([], [], marker='o', markersize=5, color='g')
 path, = ax.plot([], [], marker='+', markersize=3, color='red')
 
 def update(obj, x, y):
