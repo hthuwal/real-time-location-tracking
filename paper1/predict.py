@@ -120,8 +120,21 @@ for file in f:
                 for cid, power in zip(controllers, powers):
                     radial_distance = utility.rssi_to_dis(power, param[cid][1], param[cid][0])
                     ds.append(radial_distance)
-
+                
                 intersection = utility.optimum(controllers, powers, param, (x1, y1), x1, y1, x2, y2)
+                
+                intersection_arr = []
+                intersection_arr.append(utility.optimum(controllers, powers, param, (x1, y1), x1, y1, x2, y2))
+                for i in range(5):
+                    intersection_arr.append(utility.optimum(controllers, powers+5*np.random.randn(len(powers)), param, (x1, y1), x1, y1, x2, y2))
+
+                intersection = [0, 0]
+                for x in intersection_arr:
+                    intersection[0] += x[0]
+                    intersection[1] += x[1]
+                intersection[0] = intersection[0]/len(intersection_arr)
+                intersection[1] = intersection[1]/len(intersection_arr)
+
                 x1, y1 = x2, y2
                 x2, y2 = intersection
                 # plot_circles(circles, mac, ts)
@@ -146,11 +159,15 @@ for ts in dict_path2:
         num_loc += 1
         update(path, [test_dict[ts][0]], [test_dict[ts][1]])
         ax.legend([path, validation], ["# points: %d\ntime: %s" % (num_loc, ts)])
+        # for i in range(6):
+        #     update(path, [test_dict[ts][i][0]], [test_dict[ts][i][1]])
+        #     ax.legend([path, validation], ["# points: %d\ntime: %s" % (num_loc, ts)])
 
     # plt.savefig(target + "/%03d.png" % count)
     ax.set_title("%s\nHeurisitic 3" % (name))
-    plt.pause(0.02)
+    plt.pause(0.2)
 
+print utility.root_mean_square_error(dict_path2, test_dict)
 ax.set_title("%s\nHeurisitic 3\nRMSQ: %f" % (name, utility.root_mean_square_error(dict_path2, test_dict)))
 # plt.savefig(target + "/%03d.png" % (count + 1))
 plt.show()

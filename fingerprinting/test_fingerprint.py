@@ -3,7 +3,7 @@ import os
 import numpy as np 
 import datetime
 
-df_device = pd.read_csv('moto.csv')
+df_device = pd.read_csv('micromax.csv')
 df_device = df_device[df_device['count'] == 4]
 df_device.reset_index(drop=True, inplace=True)
 # df_device.astype({'controllerid' : np.object})
@@ -37,12 +37,23 @@ for i in range(len(df_device_new)):
 	for j in range(len(df_fingerprint)):
 		fng_pwr = [df_fingerprint.loc[j, 'pwr'+str(k)] for k in range(1, 5)]
 		fng_pwr = np.asarray(fng_pwr)
-		dot_prods[j] = np.sum(np.multiply(obs_pwr, fng_pwr))
+		# dot_prods[j] = np.sum(np.multiply(obs_pwr, fng_pwr))
+		dot_prods[j] = np.dot(obs_pwr, fng_pwr)
 
-	idx = np.argmax(dot_prods)
+	idx = np.argmin(dot_prods)
+	idx1 = dot_prods.argsort()[:5][::-1]
+	val1 = dot_prods[idx1]
+
+	list = []
+	for g in idx1:	
+		x = df_fingerprint.loc[g, 'X']
+		y = df_fingerprint.loc[g, 'Y']
+		list.append([x, y])
+
+	print val1
+	print str(list[0]) + ', ' + str(list[1]) + ', ' + str(list[2]) + ', ' + str(list[3]) + ', ' + str(list[4])
 	x = df_fingerprint.loc[idx, 'X']
 	y = df_fingerprint.loc[idx, 'Y']
-
 	df_device_new.loc[i, 'pred_loc'] = [x, y]
 
 # print df_device_new
@@ -63,4 +74,4 @@ for i in range(len(df_device_new)):
 	df_device_new.loc[i, 'act_loc'] = [x, y]
 
 print df_device_new	
-df_device_new.to_csv('moto_fing_pred.csv')
+df_device_new.to_csv('micromax_fing_pred.csv')

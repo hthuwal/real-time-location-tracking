@@ -43,10 +43,13 @@ df_path2['Start_time'] = df_path2['Start_time'].apply(lambda x: x.strftime('%H:%
 ts2 = df_path2['Start_time'].tolist()
 target_ts = ts1 + ts2
 
-# macs = ["00:0c:e7:4f:38:a5", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
-# names = ["Micromax", "Samsung S5", "oneplus x", "Yureka", "Moto"]
-macs = ["84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56"]
-names = ["Samsung S5", "oneplus x", "Yureka"]
+macs = ["00:0c:e7:4f:38:a5", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
+names = ["Micromax", "Samsung S5", "oneplus x", "Yureka", "Moto"]
+macs = macs[1:]
+names = names[1:]
+
+# macs = ["84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
+# names = ["Samsung S5", "oneplus x", "Yureka", "Moto"]
 
 f = os.listdir('../spencers_data')
 f.sort()
@@ -102,6 +105,6 @@ for file in f:
 
         final_df = final_df.append(df_loc_track)
 
-final_df.drop(['index'], axis=1, inplace=True)  # macs not needed
+# final_df.drop(['index'], axis=1, inplace=True)  # macs not needed
 final_df.sort_values('ts', inplace=True)
 final_df.to_csv("gen_csvs/fingerprint.csv", index=False)
