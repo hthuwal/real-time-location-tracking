@@ -13,8 +13,16 @@ np.random.seed(42)
 
 cid = sys.argv[1]
 
-df = pd.read_csv('modified_log_controller_'+cid+'.csv')
+df = pd.read_csv('modified_training_day_log.csv')
 del df['Unnamed: 0']
+df['pwr'] = df['pwr'].astype('int64')
+
+macs = ["00:0c:e7:4f:38:a5", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
+names = ["Micromax", "Samsung S5", "oneplus x", "Yureka", "Moto"]
+
+df = df[df['controllerid'] == int(cid)]
+print(df['mac'].isin(macs))
+df = df[np.invert(df['mac'].isin(macs))]
 
 df.reset_index(inplace=True, drop=True)
 
@@ -75,10 +83,7 @@ joblib.dump(model, filename)
 stop = timeit.default_timer()
 print(stop-start)
 
-macs = ["00:0c:e7:4f:38:a5", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
-names = ["Micromax", "Samsung S5", "oneplus x", "Yureka", "Moto"]
-
-df_test = pd.read_csv('modified_training_day_logs.csv')
+df_test = pd.read_csv('modified_training_day_log.csv')
 for i in range(len(macs)):
     df1 = df_test[(df_test['controllerid'] == int(cid)) & (df_test['mac'] == macs[i])]
     df1.reset_index(inplace=True, drop=True)
