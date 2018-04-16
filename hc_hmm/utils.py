@@ -55,7 +55,9 @@ class hmm(object):
         # TODO check correctness
         state_data = []
         emission_data = {0: [], 1: [], 2: [], 3: []}
+        start_probs = [1 for i in range(self.num_states)]
         for obs_seq, state_seq in data:
+            start_probs[state_seq[0]] += 1
             for i in range(len(state_seq) - 1):
                 state_data.append([self.states[i][0], self.states[i][1], self.states[i + 1][0], self.states[i + 1][1]])
                 obs = obs_seq[i]
@@ -67,12 +69,13 @@ class hmm(object):
             for ap in obs:
                 emission_data[ap].append([self.states[i][0], self.states[i][1], obs[ap]])
 
-        print(state_data)
         self.transition = (np.mean(state_data, axis=0), np.cov(state_data, rowvar=False))
 
         for ap in emission_data:
             if len(emission_data[ap]) != 0:
                 self.emission[ap] = (np.mean(emission_data[ap], axis=0), np.cov(emission_data[ap], rowvar=False))
+
+        self.starting_probs = np.array(start_probs) / np.sum(np.array(start_probs))
 
     def expectation(self, data):
         # data -  a list of (observation_seq, labels) labels = None if not known
