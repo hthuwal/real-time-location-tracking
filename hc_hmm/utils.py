@@ -35,7 +35,6 @@ class hmm(object):
         for j in range(1, len(observed_seq)):
             for i in range(self.num_states):
                 temp = [self.transition_func(k, i) * deltas[k][j - 1][0] for k in range(self.num_states)]
-                print(temp)
                 best = max(temp)  # todo multiply with emission probabilities based on observed data
                 observation = observed_seq[j]
                 for ap in observation:
@@ -51,6 +50,7 @@ class hmm(object):
         return path
 
     def maximization(self, data):
+        print("maximization")
         # data -  a list of (observation_seq, labels)
         # TODO check correctness
         state_data = []
@@ -79,11 +79,13 @@ class hmm(object):
 
     def expectation(self, data):
         # data -  a list of (observation_seq, labels) labels = None if not known
-        for i in range(len(data)):
+        print("Expectation")
+        for i in tqdm(range(len(data))):
             data[i] = (data[i][0], self.viterbi_dp(data[i][0]))
 
     def em(self, data, max_iter=100):
-        for i in tqdm(range(max_iter)):
+        for i in range(max_iter):
+            print("Step %d" % (i))
             self.expectation(data)
             self.maximization(data)
 
