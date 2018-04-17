@@ -32,8 +32,8 @@ class hmm(object):
         for i in range(self.num_states):
             deltas[i][0] = (self.starting_probs[i], None)
 
-        for j in range(1, len(observed_seq)):
-            for i in range(self.num_states):
+        for j in tqdm(range(1, len(observed_seq))):
+            for i in tqdm(range(self.num_states)):
                 temp = [self.transition_func(k, i) * deltas[k][j - 1][0] for k in range(self.num_states)]
                 best = max(temp)  # todo multiply with emission probabilities based on observed data
                 observation = observed_seq[j]
