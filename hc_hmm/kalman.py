@@ -23,52 +23,32 @@ aps = {
 }
 
 
-# fig = plt.figure(1)
-# ax = fig.add_subplot(1, 1, 1)
-# ax.set_title("Heurisitic 3")
-# ax.set_xlim(-50,50)
-# ax.set_ylim(-50,50)
+def plot(x, y, vx, vy):
+    fig = plt.figure(1)
+    ax = fig.add_subplot(1, 1, 1)
+    for i in range(len(y)):
+        ax.clear()
+        ax.set_xlim(-50, 50)
+        ax.set_ylim(-50, 50)
+        aps_plot, = ax.plot([-22, 0, 0, -22], [1, 1, 24, 26], marker='o', markersize=10, ls='')
+        ax.plot(x[0:i], y[0:i], marker='+', color='red')
+        ax.plot(vx[0:i], vy[0:i], marker='o', color='green')
+        plt.pause(0.2)
 
-# aps_plot, = ax.plot([-22, 0, 0, -22], [1, 1, 24, 26], marker='o', markersize=10, ls='')
-# validation, = ax.plot([], [], marker='o', markersize=3, color='g')
-# path, = ax.plot([], [], marker='+', markersize=3, color='red')
-
-# para_file = open("path1_params.csv", "r")
-# param = {}
-# for line in para_file:
-#     line = list(map(float, line.split(',')))
-#     param[int(line[0])] = line[1:]
-
-# print(param)
-
-
-# def update(obj, x, y):
-#     x_old = obj.get_xdata()
-#     y_old = obj.get_ydata()
-#     x_old = np.append(x_old, x)
-#     y_old = np.append(y_old, y)
-#     obj.set_data(x_old, y_old)
-#     plt.pause(0.2)
+    plt.show()
 
 
 f = os.listdir('../spencers_data')
 f.sort()
 
-# # reading and plotting validation data
-# df_path = pd.read_csv("outputs_path1.csv")
-# df_path['Start_time'] = pd.to_datetime(df_path['Start_time'], infer_datetime_format=True)
-# # df_path['Start_time'] = df_path['Start_time'].apply(lambda x: x + datetime.timedelta(hours=12))  # todo write proper code
-# df_path['Start_time'] = df_path['Start_time'].apply(lambda x: x.strftime('%H:%M'))
-# x_validation = df_path['X'].tolist()
-# y_validation = df_path['Y'].tolist()
-# ts1 = df_path['Start_time'].tolist()
-
-# dict_path2 = {}
-# for a, b, c in zip(ts1, x_validation, y_validation):
-#     dict_path2[a] = (b, c)
-
-# print(ts1)
-# test_dict = {}
+# reading and plotting validation data
+df_path = pd.read_csv("../paper1/outputs_path1.csv")
+df_path['Start_time'] = pd.to_datetime(df_path['Start_time'], infer_datetime_format=True)
+# df_path['Start_time'] = df_path['Start_time'].apply(lambda x: x + datetime.timedelta(hours=12))  # todo write proper code
+df_path['Start_time'] = df_path['Start_time'].apply(lambda x: x.strftime('%H:%M'))
+x_validation = df_path['X'].tolist()
+y_validation = df_path['Y'].tolist()
+ts1 = df_path['Start_time'].tolist()
 
 mac = macs[0]
 name = names[0]
@@ -97,33 +77,17 @@ for file in f:
                 pwrs[int(c) - 1] = float(p)
             pwrs = np.ma.masked_values(pwrs, -500)
             observations.append((x[0][2], pwrs))
-observations = [each for each in observations if each[0] >= "17:05" and each[0] <= "18:48"]
+
+# observation for path1
+observations = [each for each in observations if (each[0] >= "17:05" and each[0] <= "17:25") or (each[0] >= "18:31" and each[0] <= "18:48")]
 times, seq = zip(*observations)
 
-kf = KalmanFilter(initial_state_mean=[0, 0], n_dim_obs=4)
-kf.em(seq, n_iter=50, em_vars=['transition_covariance', 'observation_covariance', 'initial_state_covariance'])
+kf = KalmanFilter(initial_state_mean=[0, 0], n_dim_obs=4)  # taking the centroid of area as the mean
+print("Expectation Maximization")
+kf.em(seq, n_iter=1000, em_vars=['transition_covariance', 'observation_covariance', 'transtion_matrix', 'observation_matrix'])
+print("Estimating Path")
+ans = kf.smooth(seq)[0]
+print("Plotting")
+y, x = zip(*ans)
 
-# count = 0
-# num_loc = 0
-# target = "plots/test/" + name
-# ax.legend([path, validation], ["# points: %d" % (num_loc)])
-
-# for ts in dict_path2:
-#     count += 1
-#     update(validation, [dict_path2[ts][0]], [dict_path2[ts][1]])
-#     if ts in test_dict:
-#         num_loc += 1
-#         update(path, [test_dict[ts][0]], [test_dict[ts][1]])
-#         ax.legend([path, validation], ["# points: %d\ntime: %s" % (num_loc, ts)])
-#         # for i in range(6):
-#         #     update(path, [test_dict[ts][i][0]], [test_dict[ts][i][1]])
-#         #     ax.legend([path, validation], ["# points: %d\ntime: %s" % (num_loc, ts)])
-
-#     # plt.savefig(target + "/%03d.png" % count)
-#     ax.set_title("%s\nHeurisitic 3" % (name))
-#     plt.pause(0.2)
-
-# print utility.root_mean_square_error(dict_path2, test_dict)
-# ax.set_title("%s\nHeurisitic 3\nRMSQ: %f" % (name, utility.root_mean_square_error(dict_path2, test_dict)))
-# # plt.savefig(target + "/%03d.png" % (count + 1))
-# plt.show()
+plot(x, y, x_validation, y_validation)
