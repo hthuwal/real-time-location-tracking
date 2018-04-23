@@ -3,11 +3,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
 # import utility
-import descartes
 import os
 import numpy as np
-import utils
-import create_sequence
 from pykalman import KalmanFilter
 
 macs = ["00:0c:e7:4f:38:a5", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
