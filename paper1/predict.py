@@ -22,9 +22,7 @@ aps = {
 
 fig = plt.figure(1)
 ax = fig.add_subplot(1, 1, 1)
-ax.set_title("Heurisitic 3")
-ax.set_xlim(-50,50)
-ax.set_ylim(-50,50)
+ax.set_title("Using Downhill Simplex Algortihm")
 
 aps_plot, = ax.plot([-22, 0, 0, -22], [1, 1, 24, 26], marker='o', markersize=10, ls='')
 validation, = ax.plot([], [], marker='o', markersize=3, color='g')
@@ -120,20 +118,20 @@ for file in f:
                 for cid, power in zip(controllers, powers):
                     radial_distance = utility.rssi_to_dis(power, param[cid][1], param[cid][0])
                     ds.append(radial_distance)
-                
+
                 intersection = utility.optimum(controllers, powers, param, (x1, y1), x1, y1, x2, y2)
-                
+
                 intersection_arr = []
                 intersection_arr.append(utility.optimum(controllers, powers, param, (x1, y1), x1, y1, x2, y2))
                 for i in range(5):
-                    intersection_arr.append(utility.optimum(controllers, powers+5*np.random.randn(len(powers)), param, (x1, y1), x1, y1, x2, y2))
+                    intersection_arr.append(utility.optimum(controllers, powers + 5 * np.random.randn(len(powers)), param, (x1, y1), x1, y1, x2, y2))
 
                 intersection = [0, 0]
                 for x in intersection_arr:
                     intersection[0] += x[0]
                     intersection[1] += x[1]
-                intersection[0] = intersection[0]/len(intersection_arr)
-                intersection[1] = intersection[1]/len(intersection_arr)
+                intersection[0] = intersection[0] / len(intersection_arr)
+                intersection[1] = intersection[1] / len(intersection_arr)
 
                 x1, y1 = x2, y2
                 x2, y2 = intersection
@@ -149,7 +147,7 @@ for file in f:
 
 count = 0
 num_loc = 0
-target = "plots/test/" + name
+target = "plots/"
 ax.legend([path, validation], ["# points: %d" % (num_loc)])
 
 for ts in dict_path2:
@@ -163,11 +161,11 @@ for ts in dict_path2:
         #     update(path, [test_dict[ts][i][0]], [test_dict[ts][i][1]])
         #     ax.legend([path, validation], ["# points: %d\ntime: %s" % (num_loc, ts)])
 
-    # plt.savefig(target + "/%03d.png" % count)
-    ax.set_title("%s\nHeurisitic 3" % (name))
+    plt.savefig(target + "/%03d.png" % count)
+    ax.set_title("%s\nUsing Downhill Simplex Algortihm" % (name))
     plt.pause(0.2)
 
-print utility.root_mean_square_error(dict_path2, test_dict)
-ax.set_title("%s\nHeurisitic 3\nRMSQ: %f" % (name, utility.root_mean_square_error(dict_path2, test_dict)))
-# plt.savefig(target + "/%03d.png" % (count + 1))
+print(utility.root_mean_square_error(dict_path2, test_dict))
+ax.set_title("%s\nUsing Downhill Simplex Algortihm\nRMSQ: %f" % (name, utility.root_mean_square_error(dict_path2, test_dict)))
+plt.savefig(target + "/%03d.png" % count)
 plt.show()
