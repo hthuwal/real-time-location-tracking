@@ -1,4 +1,4 @@
-from __future__ import division
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
@@ -33,6 +33,7 @@ def plot(x, y, vx, vy):
         plt.pause(0.2)
 
     plt.show()
+    ax.clear()
 
 
 f = os.listdir('../spencers_data')
@@ -77,14 +78,34 @@ for file in f:
 
 # observation for path1
 observations = [each for each in observations if (each[0] >= "17:05" and each[0] <= "17:25") or (each[0] >= "18:31" and each[0] <= "18:48")]
-times, seq = zip(*observations)
+times, seq = list(zip(*observations))
 
+init_means = np.random.uniform(low=-10, high=10, size=10)
+init_means = init_means.reshape((5, 2))
+for i in range(init_means.shape[0]):
+    mean = init_means[i, :]
+    kf = KalmanFilter(initial_state_mean=mean, n_dim_obs=4)  # taking the centroid of area as the mean
+    print("Expectation Maximization for - "+str(mean))
+    # print(seq)
+    kf.em(seq, n_iter=1000, em_vars=['transition_covariance', 'observation_covariance', 'transtion_matrix', 'observation_matrix'])
+    print("Estimating Path")
+    ans = kf.smooth(seq)[0]
+    print("Plotting")
+    y, x = list(zip(*ans))
+    x, y = list(zip(*ans))
+
+    plot(x, y, x_validation, y_validation)
+
+
+# for i in range(init_means.shape[0]):
 kf = KalmanFilter(initial_state_mean=[0, 0], n_dim_obs=4)  # taking the centroid of area as the mean
-print("Expectation Maximization")
+print("Expectation Maximization for - ")
+# print(seq)
 kf.em(seq, n_iter=1000, em_vars=['transition_covariance', 'observation_covariance', 'transtion_matrix', 'observation_matrix'])
 print("Estimating Path")
 ans = kf.smooth(seq)[0]
 print("Plotting")
-y, x = zip(*ans)
+y, x = list(zip(*ans))
+# x, y = list(zip(*ans))
 
 plot(x, y, x_validation, y_validation)
