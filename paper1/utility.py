@@ -1,6 +1,6 @@
 import math
 from shapely.geometry import Point
-from scipy.optimize import fmin_tnc
+from scipy.optimize import fmin_tnc, fmin
 import numpy as np
 
 
@@ -29,6 +29,7 @@ def inner_angle(v, w):
     rad = math.acos(cosx)  # in radians
     return rad, cosx
 
+
 def heuristic_3(circles):
     x, y = 0, 0
     t = 0
@@ -42,7 +43,7 @@ def heuristic_3(circles):
 
 
 def jitter_error(x, y, x1, y1, x2, y2):
-    return inner_angle ([x-x2, y-y2], [x2-x1, y2-y1])
+    return inner_angle([x - x2, y - y2], [x2 - x1, y2 - y1])
 
 
 def dell_jitter_error(x, y, x1, y1, x2, y2):
@@ -66,41 +67,40 @@ def fs(z, *args):
     cids, powers, params, x1, y1, x2, y2 = args
 
     F = 0
-    jitters = 0
+    # jitters = 0
     for cid, p in zip(cids, powers):
         x0, y0 = aps[cid]
         hc = math.sqrt((x - x0)**2 + (y - y0)**2) * 39.3701 / 34
         F += (params[cid][0] - p - 10 * params[cid][1] * np.log10(hc))**2
 
-    jac = np.zeros([2, ])
-    jitter_jac = np.zeros([2, 1])
+    # jac = np.zeros([2, ])
+    # jitter_jac = np.zeros([2, 1])
 
-    for cid, p in zip(cids, powers):
-        x0, y0 = aps[cid]
-        hc = math.sqrt((x - x0)**2 + (y - y0)**2) * 39.3701 / 34
+    # for cid, p in zip(cids, powers):
+    #     x0, y0 = aps[cid]
+    #     hc = math.sqrt((x - x0)**2 + (y - y0)**2) * 39.3701 / 34
 
-        jac[0] += (2 * (params[cid][0] - p - 10 * params[cid][1] * np.log10(hc)) * 10 * params[cid][1] * (x0 - x)) / (hc * hc)
-        jac[1] += (2 * (params[cid][0] - p - 10 * params[cid][1] * np.log10(hc)) * 10 * params[cid][1] * (y0 - y)) / (hc * hc)
+    #     jac[0] += (2 * (params[cid][0] - p - 10 * params[cid][1] * np.log10(hc)) * 10 * params[cid][1] * (x0 - x)) / (hc * hc)
+    #     jac[1] += (2 * (params[cid][0] - p - 10 * params[cid][1] * np.log10(hc)) * 10 * params[cid][1] * (y0 - y)) / (hc * hc)
 
-    jx, jy = dell_jitter_error(x, y, x1, y1, x2, y2)
+    # jx, jy = dell_jitter_error(x, y, x1, y1, x2, y2)
 
-    jac[0] /= F
-    jac[1] /= F
+    # jac[0] /= F
+    # jac[1] /= F
 
-    theta, cosx = jitter_error(x, y, x1, y1, x2, y2)
-    if cosx == 1:
-        cosx = 0.99
-    elif cosx == -1:
-        cosx = -0.99
-    jac[0] += jx * (-1 / math.sqrt(1 - cosx*cosx))
-    jac[1] += jy * (-1 / math.sqrt(1 - cosx*cosx))
-    return np.log(F) + theta, jac
+    # theta, cosx = jitter_error(x, y, x1, y1, x2, y2)
+    # if cosx == 1:
+    #     cosx = 0.99
+    # elif cosx == -1:
+    #     cosx = -0.99
+    # jac[0] += jx * (-1 / math.sqrt(1 - cosx*cosx))
+    # jac[1] += jy * (-1 / math.sqrt(1 - cosx*cosx))
+    return np.log(F)
 
 
 def optimum(cids, powers, params, zinit, x1, y1, x2, y2):
-    z = fmin_tnc(fs, list(zinit), args=(cids, powers, params, x1, x2, y1, y2))
-    print(z[0])
-    return z[0]
+    z = fmin(fs, list(zinit), args=(cids, powers, params, x1, x2, y1, y2))
+    return z
 
 
 def rssi_to_dis(signal, p0, epsi):
