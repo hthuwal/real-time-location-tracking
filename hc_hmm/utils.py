@@ -9,8 +9,8 @@ class hmm(object):
         self.num_states = len(states)
         self.states = states
         self.starting_probs = self._normalize(self.random_state.rand(self.num_states))
-        self.transition = ([0, 0, 0, 0], 1)  # initialized with mean 0, identitiy covariance matrix
-        self.emission = [([0, 0, 0], 1)] * 4
+        self.transition = (np.random.randn(4), 1)  # initialized with mean 0, identitiy covariance matrix
+        self.emission = [(np.random.randn(3), 1)] * 4
 
     def _normalize(self, x):
         return (x + (x == 0)) / np.sum(x)
@@ -47,6 +47,7 @@ class hmm(object):
         for j in range(len(observed_seq) - 1, -1, -1):
             path.append(winner)
             winner = deltas[winner][j][1]
+        # print(path)
         return path
 
     def maximization(self, data):
