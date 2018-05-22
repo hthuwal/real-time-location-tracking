@@ -1,10 +1,24 @@
 import math
-from shapely.geometry import Point, Polygon
-from shapely.ops import cascaded_union
+from shapely.geometry import Point
 from itertools import combinations
 
 
 def fi(circles):
+    """
+    Find Intersection of circles.
+
+    1. Centroid of Intersection of intersection of all pair of circles
+    2. Centroid of intersction with min area among of intersection of all
+    pair of circles
+    3. None
+
+    Arguments:
+        circles -- list of ((x_center, y_center), radius)
+
+    Returns:
+        if 1 then 1 else if 2 then 2 else 3
+
+    """
     cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
     intersections = [a.intersection(b) for a, b in combinations(cs, 2)]
 
@@ -27,6 +41,16 @@ def fi(circles):
 
 
 def heuristic_1(circles):
+    """
+    Estimate location based on circles.
+
+    Arguments:
+        circles -- list of ((x_center, y_center), radius)
+
+    Returns:
+        Centroid of Intersection of intersection of all pair of circles
+
+    """
     cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
     ans = cs[0]
     for c in cs:
@@ -39,6 +63,18 @@ def heuristic_1(circles):
 
 
 def heuristic_2(circles):
+    """
+    Estimate location based on circles.
+
+    Arguments:
+        circles -- list of ((x_center, y_center), radius)
+
+    Returns:
+        c = Centroid of Intersection of intersection of all pair of circles
+        if c exists then c
+        else Weighted centroid of all intersections where weight = 1/(r1*r2)
+
+    """
     cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
     intersections = [a.intersection(b) for a, b in combinations(cs, 2)]
     weights = [1 / (a[1] * b[1]) for a, b in combinations(circles, 2)]
@@ -71,24 +107,17 @@ def heuristic_2(circles):
 
 
 def heuristic_3(circles):
-    # cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
-    # intersections = [a.intersection(b) for a, b in combinations(cs, 2)]
-    # weights = [1 / (a[1] * b[1]) for a, b in combinations(circles, 2)]
+    """
+    Estimate location based on circles.
 
-    # centroids = []
-    # weight = []
-    # for i, w in zip(intersections, weights):
-    #     if i.area != 0:
-    #         centroids.append(i.centroid)
-    #         weight.append(w)
+    Arguments:
+        circles -- list of ((x_center, y_center), radius)
 
-    # ans = cs[0]
-    # for c in cs:
-    #     ans = ans.intersection(c)
+    Returns:
+        weighted average of the centers of circles where
+        weight = 1 / radius
 
-    # if(ans.area != 0):
-    #     return ans.centroid
-
+    """
     x, y = 0, 0
     t = 0
     for c in circles:
