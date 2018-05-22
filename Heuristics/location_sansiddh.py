@@ -6,7 +6,8 @@ import utility
 import descartes
 import os
 
-macs = ["74:23:44:33:2f:b7", "00:0c:e7:4f:38:a5", "88:36:5f:f8:3b:4a", "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
+macs = ["74:23:44:33:2f:b7", "00:0c:e7:4f:38:a5", "88:36:5f:f8:3b:4a",
+        "84:38:38:f6:58:40", "c0:ee:fb:72:0c:27", "18:dc:56:8c:27:56", "80:58:f8:d8:ad:e1"]
 
 # factor to convert to inches (doesn't have any effect on the nature of plots as everything is just scaled up)
 factor = 1
@@ -33,8 +34,10 @@ def plot_circles(circles, file, ts):
         c = plt.Circle(circle[0], circle[1], color='b', fill=False)
         ax.add_artist(c)
 
+
 def plot(ay, x, y, color='b'):
     ay.plot(x, y, 'ro', markersize=5)
+
 
 def plot_polygon(p, mac, ts):
 
@@ -45,9 +48,11 @@ def plot_polygon(p, mac, ts):
     ax.add_patch(descartes.PolygonPatch(p, fc='b', ec='k', alpha=0.2))
     plt.pause(2)
 
-df_path = pd.read_csv('spencers_data/path1.csv')
+
+df_path = pd.read_csv('../spencers_data/path1.csv')
 df_path['Start_time'] = pd.to_datetime(df_path['Start_time'])
-df_path['Start_time'] = df_path['Start_time'].apply(lambda x: x.strftime('%Y-%m-13 %H:%M:%S'))
+df_path['Start_time'] = df_path['Start_time'].apply(
+    lambda x: x.strftime('%Y-%m-13 %H:%M:%S'))
 df_path['Start_time'] = pd.to_datetime(df_path['Start_time'])
 
 count = len(df_path)
@@ -55,7 +60,8 @@ for index, row in df_path.iterrows():
     if (row['Duration (min)'] == 2):
         df_path.loc[index, 'Duration (min)'] = 1
         df_path.loc[count, :] = df_path.loc[index, :]
-        df_path.loc[count, 'Start_time'] = df_path.loc[count, 'Start_time'] + pd.Timedelta('1 minute')
+        df_path.loc[count, 'Start_time'] = df_path.loc[count,
+                                                       'Start_time'] + pd.Timedelta('1 minute')
         count += 1
 
 df_path.sort_values('Start_time', inplace=True)
@@ -67,9 +73,11 @@ df_path['Start_time'] = df_path['Start_time'] + pd.Timedelta('12 hours')
 f = ['micromax', 'moto', 'oneplus', 'samsung', 'yureka']
 for file in f:
     count = 0
-    df_loc_track = pd.read_csv('spencers_data/device_modified_logs_min/'+str(file)+'.csv')
+    df_loc_track = pd.read_csv(
+        '../spencers_data/device_modified_logs_min/' + str(file) + '.csv')
     df_loc_track['ts'] = pd.to_datetime(df_loc_track['ts'])
-    df_loc_track['ts'] = df_loc_track['ts'] + pd.Timedelta('5 hours 30 minutes')
+    df_loc_track['ts'] = df_loc_track['ts'] + \
+        pd.Timedelta('5 hours 30 minutes')
 
     print(len(df_loc_track))
     idx_lst = []
@@ -104,15 +112,16 @@ for file in f:
             intersection = utility.heuristic_3(circles)
             plot_circles(circles, file, ts)
             ax.plot(x, y, 'bo', markersize=5)
-            ax.plot(df_path.loc[index, 'X'], df_path.loc[index, 'Y'], 'go', markersize=5)
+            ax.plot(df_path.loc[index, 'X'],
+                    df_path.loc[index, 'Y'], 'go', markersize=5)
             plot(ax, [intersection.x], [intersection.y], 'red')
             # plt.pause(1)
             count += 1
-            dirs = 'plots/circles/%s' %(file) 
+            dirs = 'plots/circles/%s' % (file)
             if not os.path.exists(dirs):
                 os.makedirs(dirs)
-            plt.savefig(dirs+"/%03d.png" %(count))
-            # plt.savefig('spencers_data/images/circles_'+str(file)+'_X'+str(int(df_path.loc[index, 'X']))+'_Y'+str(int(df_path.loc[index, 'Y']))+'.png')
+            plt.savefig(dirs + "/%03d.png" % (count))
+            # plt.savefig('../spencers_data/images/circles_'+str(file)+'_X'+str(int(df_path.loc[index, 'X']))+'_Y'+str(int(df_path.loc[index, 'Y']))+'.png')
             # if intersection == None:
             #     pass
 
