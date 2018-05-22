@@ -1,6 +1,6 @@
 import math
 from shapely.geometry import Point
-from scipy.optimize import fmin_tnc, fmin
+from scipy.optimize import fmin
 import numpy as np
 
 
@@ -13,40 +13,42 @@ aps = {
 
 
 def length(v):
+    """Length of a 2D vector."""
     return math.sqrt(v[0]**2 + v[1]**2)
 
 
 def dot_product(v, w):
+    """Dot Product of two 2D Vectors."""
     return v[0] * w[0] + v[1] * w[1]
 
 
-def determinant(v, w):
-    return v[0] * w[1] - v[1] * w[0]
-
-
 def inner_angle(v, w):
+    """Inner angle between two 2D vectors."""
     cosx = dot_product(v, w) / (length(v) * length(w))
     rad = math.acos(cosx)  # in radians
     return rad, cosx
 
 
-def heuristic_3(circles):
-    x, y = 0, 0
-    t = 0
-    for c in circles:
-        w = 1.0 / (c[1])
-        x += c[0][0] * w
-        y += c[0][1] * w
-        t += w
-
-    return Point(x / t, y / t)
-
-
 def jitter_error(x, y, x1, y1, x2, y2):
+    """
+    Angle of deviation from original Path.
+
+    Original Direction:
+        x1,y1 -> x2,y2
+
+    New Direction:
+        x2,y2 -> x,y
+
+    """
     return inner_angle([x - x2, y - y2], [x2 - x1, y2 - y1])
 
 
 def dell_jitter_error(x, y, x1, y1, x2, y2):
+    """
+    Gradient of Angle of Deviaton from original path.
+
+    May be needed by some optimization technique.
+    """
     if (x1 == x2 and y1 == y2):
         return 0, 0
     c = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
@@ -63,6 +65,7 @@ def dell_jitter_error(x, y, x1, y1, x2, y2):
 
 
 def fs(z, *args):
+    """f(x,y) to be optimized."""
     x, y = z
     cids, powers, params, x1, y1, x2, y2 = args
 
@@ -73,46 +76,43 @@ def fs(z, *args):
         hc = math.sqrt((x - x0)**2 + (y - y0)**2) * 39.3701 / 34
         F += (params[cid][0] - p - 10 * params[cid][1] * np.log10(hc))**2
 
-    # jac = np.zeros([2, ])
-    # jitter_jac = np.zeros([2, 1])
-
-    # for cid, p in zip(cids, powers):
-    #     x0, y0 = aps[cid]
-    #     hc = math.sqrt((x - x0)**2 + (y - y0)**2) * 39.3701 / 34
-
-    #     jac[0] += (2 * (params[cid][0] - p - 10 * params[cid][1] * np.log10(hc)) * 10 * params[cid][1] * (x0 - x)) / (hc * hc)
-    #     jac[1] += (2 * (params[cid][0] - p - 10 * params[cid][1] * np.log10(hc)) * 10 * params[cid][1] * (y0 - y)) / (hc * hc)
-
-    # jx, jy = dell_jitter_error(x, y, x1, y1, x2, y2)
-
-    # jac[0] /= F
-    # jac[1] /= F
-
-    # theta, cosx = jitter_error(x, y, x1, y1, x2, y2)
-    # if cosx == 1:
-    #     cosx = 0.99
-    # elif cosx == -1:
-    #     cosx = -0.99
-    # jac[0] += jx * (-1 / math.sqrt(1 - cosx*cosx))
-    # jac[1] += jy * (-1 / math.sqrt(1 - cosx*cosx))
     return np.log(F)
 
 
 def optimum(cids, powers, params, zinit, x1, y1, x2, y2):
+    """Optimize f(x,y) using Downhill simplex algorthm."""
     z = fmin(fs, list(zinit), args=(cids, powers, params, x1, x2, y1, y2))
     return z
 
 
 def rssi_to_dis(signal, p0, epsi):
+    """
+    Calculate distance based on signal strength.
+
+    Arguments:
+        signal -- Received Signal Strength
+        p0 -- Signal Strength at 1 meter
+        epsi -- epsilon
+
+    Returns
+        dstance -- distance in inches/tile
+
+    """
     return (10**((p0 - signal) / (10 * epsi))) * (39.3701 / 34)
 
 
-def rssi_to_dis_2(signal):
-    n = 3
-    return (10 ** ((-40 - signal) / (10 * n))) * (39.3701 / 34)
-
-
 def root_mean_square_error(validation, test):
+    """
+    Give correct positions and Predicted Positions calculate the RMSQ error.
+
+    Arguments:
+        validation [dict: key-time, value-(x,y)] -- Correct Postitions
+        test [dict: key-time, value-(x,y)] -- Predicted Postitions
+
+    Returns:
+        RMSQ error
+
+    """
     error = []
     for time in validation:
         if time in test:
