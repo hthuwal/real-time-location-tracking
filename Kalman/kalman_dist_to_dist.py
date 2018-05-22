@@ -18,25 +18,29 @@ aps = {
     4: np.asarray([-22 * factor, 26 * factor])
 }
 
+
 def rssi_to_dis(signal, n=2.5):
     return (10 ** ((-40 - signal) / (10 * n))) * (39.3701)
 
+
 def heuristic3(dist_arr):
-    weights = 1/dist_arr
+    weights = 1 / dist_arr
     norm = np.sqrt(np.sum(np.square(weights), axis=1))
     norm = norm.reshape((len(norm), 1))
     weights = np.divide(weights, norm)
     res = np.zeros((weights.shape[0], 2))
     for j in range(weights.shape[0]):
         for i in range(1, 5):
-            res[j, :] += aps[i]*weights[j, i-1]
+            res[j, :] += aps[i] * weights[j, i - 1]
     return res
+
 
 def rms(x, y, x_validation, y_validation):
     r1 = np.asarray(x_validation) - np.asarray(x)
     r2 = np.asarray(y_validation) - np.asarray(y)
-    res = np.sqrt(np.mean(np.square(r1)+np.square(r2)))
+    res = np.sqrt(np.mean(np.square(r1) + np.square(r2)))
     return res
+
 
 def plot(x, y, vx, vy, folder):
     fig = plt.figure(1)
@@ -49,7 +53,7 @@ def plot(x, y, vx, vy, folder):
         ax.plot(x[0:i], y[0:i], marker='+', color='red')
         ax.plot(vx[0:i], vy[0:i], marker='o', color='green')
         plt.pause(0.2)
-        plt.savefig(folder+str(i)+'.png')
+        plt.savefig(folder + str(i) + '.png')
 
     plt.show()
     ax.clear()
@@ -71,10 +75,10 @@ df_rms = pd.DataFrame(columns=['Device', 'Path_Exp', 'RMS'])
 count = 0
 
 pe_dict = {
-    2.5 : '2_half',
-    3 : '3',
-    3.5 : '3_half',
-    4 : '4'
+    2.5: '2_half',
+    3: '3',
+    3.5: '3_half',
+    4: '4'
 }
 
 for idx in range(5):
@@ -120,7 +124,7 @@ for idx in range(5):
         print(obs_dist)
 
         kf = KalmanFilter(initial_state_mean=obs_dist[0], n_dim_obs=4)  # taking the centroid of area as the mean
-        print("Expectation Maximization for - "+str(obs_dist[0]))
+        print("Expectation Maximization for - " + str(obs_dist[0]))
         # print(seq)
         kf.em(obs_dist, n_iter=1000, em_vars=['transition_covariance', 'observation_covariance', 'transtion_matrix', 'observation_matrix'])
         print("Estimating Path")
@@ -139,10 +143,10 @@ for idx in range(5):
         df_rms.loc[count, :] = [name, path_exp, rms(x, y, x_validation, y_validation)]
         count += 1
 
-        file = name+'/'+pe_dict[path_exp]+'/'
-        if not os.path.exists('plots/'+file):
-            os.makedirs('plots/'+file)
-        plot(x, y, x_validation, y_validation, 'plots/'+file)
+        file = name + '/' + pe_dict[path_exp] + '/'
+        if not os.path.exists('plots/' + file):
+            os.makedirs('plots/' + file)
+        plot(x, y, x_validation, y_validation, 'plots/' + file)
 
         df_rms.to_csv('rms_values.csv', index=False)
 
