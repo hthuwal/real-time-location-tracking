@@ -25,6 +25,7 @@ def fi(circles):
 
     return None
 
+
 def heuristic_1(circles):
     cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
     ans = cs[0]
@@ -35,6 +36,7 @@ def heuristic_1(circles):
         return ans.centroid
 
     return None
+
 
 def heuristic_2(circles):
     cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
@@ -66,6 +68,7 @@ def heuristic_2(circles):
         return Point(x / t, y / t)
 
     return None
+
 
 def heuristic_3(circles):
     # cs = [Point(c[0][0], c[0][1]).buffer(c[1]) for c in circles]
@@ -100,12 +103,34 @@ def heuristic_3(circles):
 # Using either of the two methods seems to give same results
 
 def signal_strength_to_distance(signal, freq):
-    distance = 10 ** ((27.55 + abs(signal) - (20 * math.log10(freq * 1000))) / 20.0)
+    """
+    Calculate distance based on signal strength.
+
+    Arguments:
+        signal -- Received Signal Strength
+        freq -- frequency of the signal
+
+    Returns
+        dstance -- distance in inches/tiles
+
+    """
+    distance = 10 ** ((27.55 + abs(signal) -
+                       (20 * math.log10(freq * 1000))) / 20.0)
     distance = distance * 39.3701  # converting into inches
     return distance / 34
 
 
 def rssi_to_dis(signal):
+    """
+    Calculate distance based on signal strength.
+
+    Arguments:
+        signal -- Received Signal Strength
+
+    Returns
+        dstance -- distance in inches/tiles
+
+    """
     n = 3
     return (10 ** ((-40 - signal) / (10 * n))) * (39.3701 / 34)
 
