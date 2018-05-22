@@ -40,8 +40,8 @@
 
 /spencers_data/spencers.pdf
 
-/plots/
+*plots*
 
-/__pycache__/
+*__pycache__*
 
 /pip-selfcheck.json
