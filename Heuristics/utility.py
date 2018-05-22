@@ -140,7 +140,7 @@ def signal_strength_to_distance(signal, freq):
         freq -- frequency of the signal
 
     Returns
-        dstance -- distance in inches/tiles
+        dstance -- distance in inches/tile
 
     """
     distance = 10 ** ((27.55 + abs(signal) -
@@ -157,7 +157,7 @@ def rssi_to_dis(signal):
         signal -- Received Signal Strength
 
     Returns
-        dstance -- distance in inches/tiles
+        dstance -- distance in inches/tile
 
     """
     n = 3
@@ -170,7 +170,7 @@ def root_mean_square_error(validation, test):
 
     Arguments:
         validation [dict: key-time, value-(x,y)] -- Correct Postitions
-        validation [dict: key-time, value-(x,y)] -- Predicted Postitions
+        test [dict: key-time, value-(x,y)] -- Predicted Postitions
 
     Returns:
         RMSQ error
