@@ -46,3 +46,38 @@
 
 	![Micromax](images/fingerprinting.png)
 
+## d) Unsupervised HMM - Using HMMLearn Library
+- Observed State - RSSI values; Hidden State - Location (X, Y)
+- Multinomial HMM - discretized state space, discretized observations.
+- Problem - State Space : Grid map across store. ~4000 states.
+- RSSI discretized to (-30, -31…-99). Tuple of 4 RSSIs implies 704 = ~24 M parameters!
+- Too many parameters, training time excruciatingly large
+
+## e) Unsupervised HMM - implementation from scratch
+- Gaussian Emission Probabilities, Gaussian Transition Probabilities (State space still discretized) # of parameters reduced to 20
+- However, # of possible states still ~4000
+- Hard EM (Using Viterbi) used for training - Time = O(Y<sup>2</sup>T); Y: # of states, T : sequence length
+- Due to so many states, single step of EM - 55 hours! 
+- HMM  - always discretized state space. Can’t reduce size of state space without losing accuracy
+- Therefore, we turn to continuous state space modelling, aka Kalman Filters
+
+## f) Kalman Filters
+- Kalman Filters - estimating continuous state variables, with noisy observations over time
+- Continuous - no nasty quadratic dependence on state space size;
+- Training time linear in sequence size
+- Problem - Observations : RSSI values.  State Variables : Location
+- Fundamentally different quantities. How to associate the two?
+- Possible Solution : Convert RSSI to distance, apply Kalman filter, then triangulate
+
+	![Micromax](images/kalman.png)
+
+# Future Work: Extended/Unscented Kalman Filters
+- Kalman Filter assumes that the emission = affine transformation of hidden state + Gaussian Noise.
+  Hidden State: correct distances
+  Observed State: noisy distances (calculated from RSSIs)
+
+- But with extended/unscented Kalman Filters we can model 
+  Emission = non-linear transformation of hidden state + Gaussian Noise
+  We can then have - Hidden States: Coordinates, Observed States = RSSI values
+
+- This should give better results as now we don’t need to do triangulation to find the coordinates, the hidden states are the coordinates.
