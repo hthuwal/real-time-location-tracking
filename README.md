@@ -24,3 +24,25 @@
   	3. Weight - inverse of radius of corresponding circles.
   	![Micromax](images/heuristic3.png)
 
+## b) Downhill Simplex Algorithm
+![explanation](images/explanation.png)
+
+- Let (x, y) be the current coordinates of the mobile device. 
+- (xi, yi) coordinates of the ith AP.
+- All the three previous approaches tried to find the position of the device geometrically based on the distance calculated.
+- Find the optimum value of x and y that minimize the value of F(x, y) using the Downhill Simplex Algorithm.
+
+	![Micromax](images/downhill.png)
+
+## c) Fingerprinting
+- Offline Work to create Fingerprinting Database
+	- Record the signal strength of probes received at several points by each Access Point.
+	- Store this information in a database along with the known coordinates of the client device.
+
+- Online Tracking Phase
+	- The current RSSI vector at an unknown location is compared to those stored in the fingerprint.
+	- The closest match is returned as the estimated user location.
+	- Closest: smallest euclidean distance between RSSI vectors.
+
+	![Micromax](images/fingerprinting.png)
+
