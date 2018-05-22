@@ -147,11 +147,11 @@ for ts in dict_path2:
         #     update(path, [test_dict[ts][i][0]], [test_dict[ts][i][1]])
         #     ax.legend([path, validation], ["# points: %d\ntime: %s" % (num_loc, ts)])
 
-    plt.savefig(target + "/%03d.png" % count)
+    # plt.savefig(target + "/%03d.png" % count)
     ax.set_title("%s\nUsing Downhill Simplex Algortihm" % (name))
     plt.pause(0.2)
 
 print(utility.root_mean_square_error(dict_path2, test_dict))
 ax.set_title("%s\nUsing Downhill Simplex Algortihm\nRMSQ: %f" % (name, utility.root_mean_square_error(dict_path2, test_dict)))
-plt.savefig(target + "/%03d.png" % count)
+# plt.savefig(target + "/%03d.png" % count)
 plt.show()
