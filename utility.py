@@ -136,6 +136,17 @@ def rssi_to_dis(signal):
 
 
 def root_mean_square_error(validation, test):
+    """
+    Give correct positions and Predicted Positions calculate the RMSQ error.
+
+    Arguments:
+        validation [dict: key-time, value-(x,y)] -- Correct Postitions
+        validation [dict: key-time, value-(x,y)] -- Predicted Postitions
+
+    Returns:
+        RMSQ error
+
+    """
     error = []
     for time in validation:
         if time in test:
@@ -144,5 +155,5 @@ def root_mean_square_error(validation, test):
             error.append(p1.distance(p2))
 
     error = [e * e for e in error]
-    l = len(error)
-    return math.sqrt(sum(error) / l)
+    length_err = len(error)
+    return math.sqrt(sum(error) / length_err)
