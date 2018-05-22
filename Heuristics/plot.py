@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import descartes
 import datetime
 import utility
 
@@ -20,7 +19,7 @@ def plot(ay, x, y, title, color='b'):
 
 
 # reading and plotting validation data
-validation_data1 = pd.read_csv("spencers_data/path1.csv")
+validation_data1 = pd.read_csv("../spencers_data/path1.csv")
 validation_data1['Start_time'] = pd.to_datetime(validation_data1['Start_time'], infer_datetime_format=True)
 validation_data1['Start_time'] = validation_data1['Start_time'].apply(lambda x: x + datetime.timedelta(hours=12))  # todo write proper code
 validation_data1['Start_time'] = validation_data1['Start_time'].apply(lambda x: x.strftime('%H:%M'))
@@ -39,7 +38,7 @@ validation_dict1 = {}
 for a, b, c in zip(ts1, x_validation1, y_validation1):
     validation_dict1[a] = (b, c)
 
-# validation_data2 = pd.read_csv("spencers_data/path2.csv")
+# validation_data2 = pd.read_csv("../spencers_data/path2.csv")
 # validation_data2['Start_time'] = pd.to_datetime(validation_data2['Start_time'], infer_datetime_format=True)
 # validation_data2['Start_time'] = validation_data2['Start_time'].apply(lambda x: x + datetime.timedelta(hours=12))  # todo write proper code
 # validation_data2['Start_time'] = validation_data2['Start_time'].apply(lambda x: x.strftime('%H:%M'))
@@ -84,5 +83,5 @@ plt.pause(2)
 
 for i in range(len(x_test2)):
     plot(ax2, x_test2[:i + 1], y_test2[:i + 1], "Smallest_area", color='r')
-ax2.legend([mac + "\nRMSQ : " + str(utility.root_mean_square_error(validation_dict1, test_dict2))]) 
+ax2.legend([mac + "\nRMSQ : " + str(utility.root_mean_square_error(validation_dict1, test_dict2))])
 plt.show()
