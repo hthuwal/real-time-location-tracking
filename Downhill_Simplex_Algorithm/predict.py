@@ -112,26 +112,12 @@ for file in f:
                     radial_distance = utility.rssi_to_dis(power, param[cid][1], param[cid][0])
                     circles.append((aps[int(cid)], radial_distance))
 
-                intersection = utility.heuristic_3(circles)
-
                 ds = []
                 for cid, power in zip(controllers, powers):
                     radial_distance = utility.rssi_to_dis(power, param[cid][1], param[cid][0])
                     ds.append(radial_distance)
 
                 intersection = utility.optimum(controllers, powers, param, (x1, y1), x1, y1, x2, y2)
-
-                intersection_arr = []
-                intersection_arr.append(utility.optimum(controllers, powers, param, (x1, y1), x1, y1, x2, y2))
-                for i in range(5):
-                    intersection_arr.append(utility.optimum(controllers, powers + 5 * np.random.randn(len(powers)), param, (x1, y1), x1, y1, x2, y2))
-
-                intersection = [0, 0]
-                for x in intersection_arr:
-                    intersection[0] += x[0]
-                    intersection[1] += x[1]
-                intersection[0] = intersection[0] / len(intersection_arr)
-                intersection[1] = intersection[1] / len(intersection_arr)
 
                 x1, y1 = x2, y2
                 x2, y2 = intersection
